@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
-    "package": "electron-forge package --asar=true",
+    "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint src --color"
@@ -29,7 +29,9 @@
         ]
       },
       "electronPackagerConfig": {
-        "packageManager": "npm"
+        "packageManager": "npm",
+        "appBundleId": "com.rheza.supergrin",
+        "appCategoryType": "public.app-category.productivity"
       },
       "electronWinstallerConfig": {
         "name": "supergrin"
