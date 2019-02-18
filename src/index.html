@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Grin Wallet Electron</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="tab.css" media="screen" />
+  </head>
+  <body>
+   
+
+    <div class="container">
+      
+      <!-- All of the Node.js APIs are available in this renderer process. 
+      We are using Node.js <script>document.write(process.versions.node)</script>,
+      Chromium <script>document.write(process.versions.chrome)</script>,
+      and Electron <script>document.write(process.versions.electron)</script>.
+        -->
+      
+      <div id="formWalletInit" style="display: block;">
+        <p></p>
+        <button id="createWalletBtn" type="button" class="btn btn-primary">Create Wallet</button>
+        <p></p>
+        <button id="deleteWalletBtn" type="button" class="btn btn-danger btn-sm">Delete Wallet</button>
+      </div>
+
+      <div id="formPasswordDiv">
+      <form>
+        <div class="form-group row">
+          <label id="inputPasswordText" for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputPassword" placeholder="Password">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label id="inputPasswordConfirmText" for="inputPassword" class="col-sm-2 col-form-label">Confirm Password</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputPasswordConfirm" placeholder="Password">
+          </div>
+        </div>
+        <div id="warningPassword">
+          
+        </div> 
+      </form>
+      </div>
+
+        <div id="wordSeedBox">
+          <div id="wordSeedBoxNew">
+          
+          </div> 
+        </div>  
+        <p></p>
+        <div id="buttonWordSeedDiv">
+          <button id="buttonWordSeed" type="button" class="btn btn-danger btn-sm" style="display: none;" >Done</button>
+        </div> 
+
+        <p></p>
+
+        <div id="buttonWordSeedDiv">
+          <button id="startNodeBtn" type="button" class="btn btn-danger btn-sm" style="display: none;" >Start node</button>
+          <button id="checkBalanceBtn" type="button" class="btn btn-danger btn-sm" >Check Balance</button>
+        </div> 
+
+        <p></p>
+
+        <div id="balanceBox">
+          <button type="button" class="btn btn-primary">
+            Balance <span class="badge badge-light" id="totalBalance">0.0000000</span>
+          </button>
+          <h6 id="balanceWarningBox" style="display: none;"><span class="badge badge-secondary">Waiting for Confirmation</span></h6>
+        </div>
+        <p></p>
+        <div id="detailBalance" style="display: none;">
+          <div id="balanceBox">
+            <button type="button" class="btn btn-primary">
+              awaitingConfirmation <span class="badge badge-light" id="awaitingConfirmation">0.0000000</span>
+            </button>
+          </div>
+          <p></p>
+          <div id="balanceBox">
+            <button type="button" class="btn btn-primary">
+              lockedPreviousTransaction <span class="badge badge-light" id="lockedPreviousTransaction">0.0000000</span>
+            </button>
+          </div>
+          <p></p>
+          <div id="balanceBox">
+            <button type="button" class="btn btn-primary">
+              currentlySpendable <span class="badge badge-light" id="currentlySpendable">0.0000000</span>
+            </button>
+          </div>
+        </div>
+        <div id="sendGrinWarning" class="alert alert-warning" role="alert" style="display: none;">
+            
+        </div>
+        <div class="tab-frame">
+            <input type="radio" checked name="tab" id="tab1">
+            <label for="tab1">Send</label>
+          
+            <input type="radio" name="tab" id="tab2">
+            <label for="tab2">Receive</label>
+
+            <div class="tab">
+                <div id="sendGrinBox">
+                    <div class="input-group mb-3">
+                        <input id="sendGrinAmount" type="text" class="form-control" placeholder="0.00000" aria-label="0.00000" aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                          <span class="input-group-text" id="basic-addon2">ツ</span>
+                        </div>
+                      </div>
+                  <button id="sendGrinBtn" type="button" class="btn btn-danger btn-sm" >Send Grin</button>
+                  <button id="cancelGrinBtn" type="button" class="btn btn-danger btn-sm" >Cancel All Grin Txs</button>
+                </div> 
+        
+                <p></p>
+        
+                <div class="card" style="width: 17rem;">
+                    <!--<img src="..." class="card-img-top" alt="...">-->
+                    <div id="dragFileResponse" class="card-body">
+                      <h5 class="card-title">Finalize file</h5>
+                      <p class="card-text">Drop your response file here</p>
+                      
+                    </div>
+                </div>
+            </div>
+            <div class="tab">
+                <div class="card" style="width: 17rem;">
+                    <!--<img src="..." class="card-img-top" alt="...">-->
+                    <div id="dragFileReceive" class="card-body">
+                      <h5 class="card-title">Receive file</h5>
+                      <p class="card-text">Drop your receive file here</p>
+                      
+                    </div>
+            </div>
+            </div>
+            
+          </div>
+          
+          </div>   
+        
+        <p></p>
+        
+      </div>
+      <p></p>
+    </div>
+
+    <script>
+      // You can also require other files to run in this process
+      require('./renderer.js')
+
+      
+    </script>
+  </body>
+</html>
