@@ -93,7 +93,7 @@
         <div id="sendGrinWarning" class="alert alert-warning" role="alert" style="display: none;">
             
         </div>
-        <div class="tab-frame">
+        <div id="SendAndReceiveBox" class="tab-frame">
             <input type="radio" checked name="tab" id="tab1">
             <label for="tab1">Send</label>
           
@@ -150,10 +150,6 @@
     </script>
     <script>
       document.addEventListener('readystatechange', event => {
-
-        if (event.target.readyState === "interactive") {      //same as:  document.addEventListener("DOMContentLoaded"...   // same as  jQuery.ready
-            //");
-        }
 
         if (event.target.readyState === "complete") {
           var checkButton = document.getElementById("checkInitialBtn");

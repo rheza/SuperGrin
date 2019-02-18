@@ -31,7 +31,8 @@
       "electronPackagerConfig": {
         "packageManager": "npm",
         "appBundleId": "com.rheza.supergrin",
-        "appCategoryType": "public.app-category.productivity"
+        "appCategoryType": "public.app-category.productivity",
+        "icon":"src/icon.icns"
       },
       "electronWinstallerConfig": {
         "name": "supergrin"

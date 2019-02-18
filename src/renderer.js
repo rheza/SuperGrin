@@ -33,7 +33,7 @@ function checkIfWalletAlreadyExists() {
         walletExist();
     } else if(err.code === 'ENOENT') {
         // file does not exist
-        fs.writeFile('log.txt', 'Some log\n');
+        walletNotExist();
     } else {
         console.log('Some other error: ', err.code);
     }
@@ -491,6 +491,13 @@ function finalizeResponse(fileLocation) {
 
 function enterPassword() {
     console.log("enter password");
+}
+
+function walletNotExist() {
+  document.getElementById("checkBalanceBtn").style = "display: none;";
+  document.getElementById("SendAndReceiveBox").style = "display: none;";
+  document.getElementById("createWalletBtn").style = "display: block;";
+  document.getElementById("deleteWalletBtn").style = "display: block;";
 }
 
 function walletExist() {
