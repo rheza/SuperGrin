@@ -2,16 +2,44 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 var appRootDir = require('app-root-dir').get();
-const db = require('electron-db');
-var grinnode = appRootDir +"/";
+var grinnode = appRootDir +"/src/";
 const { exec } = require('child_process')
 const {ipcRenderer} = require('electron')
+const remote = require('electron').remote;
+const app = remote.app;
+appRootDir = app.getPath('userData');
+
+
+
 var fs = require('fs');
 var process = '';
 var nodeAddress = 'http://45.76.144.45:3413';
 
 var walletArray = [];
 var transactionArray = [];
+var str = "";
+
+
+function checkIfWalletAlreadyExists() {
+  var fileLocation = appRootDir;
+  console.log(appRootDir);
+  fileLocation = fileLocation.replace("Library/Application Support/SuperGrin",""); //replace this with wallet if installed
+  console.log(fileLocation);
+
+
+  fs.stat(fileLocation +'.grin/floo/wallet_data/wallet.seed', function(err, stat) {
+    if(err == null) {
+        console.log('File exists');
+        walletExist();
+    } else if(err.code === 'ENOENT') {
+        // file does not exist
+        fs.writeFile('log.txt', 'Some log\n');
+    } else {
+        console.log('Some other error: ', err.code);
+    }
+  });
+}
+
 function createWallet(mode,text) {
 
     if(!mode){
@@ -59,10 +87,10 @@ function createWallet(mode,text) {
 
 
 function deleteWallet() {
-
+    console.log(appRootDir);
     var fileLocation = appRootDir;
     console.log(appRootDir);
-    fileLocation = fileLocation.replace("Applications/SuperGrin",""); //replace this with wallet if installed
+    fileLocation = fileLocation.replace("Library/Application Support/SuperGrin",""); //replace this with wallet if installed
     console.log(fileLocation);
     const process = exec('rm -rf '+ fileLocation +'.grin/floo/wallet_data/wallet.seed')
   
@@ -124,6 +152,15 @@ var sendGrinBtn = document.getElementById('sendGrinBtn');
     });
       
 }
+
+var checkInitialBtn = document.getElementById('checkInitialBtn');
+  if(checkInitialBtn){
+    checkInitialBtn.addEventListener('click', function() { 
+        checkIfWalletAlreadyExists();
+    });
+      
+}
+
 
 var inputPassword = document.getElementById('inputPassword');
 var inputPasswordConfirm = document.getElementById('inputPasswordConfirm');
@@ -246,7 +283,7 @@ var cancelBtn = document.getElementById('cancelGrinBtn');
 module.exports.createWallet = createWallet;
 
 function cancelTransactionGrin(){
-  resetAPiSecret();
+  resetAPISecret();
   
   transactionArray = [];
 
@@ -291,7 +328,7 @@ function cancelGrinNew(x){
   var i = 0, howManyTimes = x;
   function wait() {
     console.log('canceling transaction no: ' + i);
-    resetAPiSecret();
+    resetAPISecret();
     process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' cancel -i '+ i);
     enterPasswordToProcess();
 
@@ -329,7 +366,7 @@ function cancelGrin(i){
   var x = 6;
   //for (x = 1; x < i; x++) { 
     console.log('canceling transaction no: ' + x);
-    resetAPiSecret();
+    resetAPISecret();
     process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' cancel -i '+ x);
     enterPasswordToProcess();
 
@@ -362,7 +399,7 @@ function cancelGrin(i){
 
 
 function sendGrin() {
-  resetAPiSecret();
+  resetAPISecret();
   var sendGrinAmount = document.getElementById('sendGrinAmount').value;
   console.log(sendGrinAmount);
 
@@ -371,7 +408,9 @@ function sendGrin() {
   let textRandom = Math.random().toString(36).substring(7);
   var fileLocation = appRootDir;
   console.log(appRootDir);
-  fileLocation = fileLocation.replace("grin-wallet-electron","");
+  fileLocation = fileLocation.replace("Library/Application Support/SuperGrin","Desktop"); //replace this with wallet if installed
+  console.log(fileLocation);
+  
   
   process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' send -m file -d '+ fileLocation +'mytransaction-'+ textRandom+'.tx '+ sendGrinAmount);
   
@@ -407,7 +446,7 @@ function sendGrin() {
 
 
 function finalizeReceive(fileLocation) {
-  resetAPiSecret();
+  resetAPISecret();
   process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' receive -i ' + fileLocation)
   enterPasswordToProcess();
   process.stdout.on('data', (data) => {
@@ -431,7 +470,7 @@ function finalizeReceive(fileLocation) {
 };
 
 function finalizeResponse(fileLocation) {
-  resetAPiSecret();
+  resetAPISecret();
   process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' finalize -i ' + fileLocation)
   enterPasswordToProcess();
   process.stdout.on('data', (data) => {
@@ -489,11 +528,13 @@ function hideWordSeed() {
 
 }
 
-function resetAPiSecret(){
+function resetAPISecret(){
+  console.log(appRootDir);
   var fileLocation = appRootDir;
   console.log(appRootDir);
-  fileLocation = fileLocation.replace("Applications/SuperGrin",""); //replace this with wallet if installed
+  fileLocation = fileLocation.replace("Library/Application Support/SuperGrin",""); //replace this with wallet if installed
   console.log(fileLocation);
+  
  
   fs.unlink(fileLocation +'.grin/floo/.api_secret',function(err){
     if(err) return console.log(err);
@@ -510,7 +551,7 @@ function resetAPiSecret(){
 
 }
 function startNode() {
-    resetAPiSecret();
+    resetAPISecret();
     process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' info')
   
     process.stdout.on('data', (data) => {
@@ -549,7 +590,7 @@ function checkWalletBalance() {
     hideAllWarning();
     console.log("check balance");
     console.log(walletArray.length);
-    resetAPiSecret();
+    resetAPISecret();
     process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' info');
     
 
@@ -585,13 +626,13 @@ function checkWalletBalance() {
             console.log(awaitingConfirmation);
             console.log(lockedPreviousTransaction);
             console.log(currentlySpendable);
-
+            /*
             db.createTable('walletInfo', (succ, msg) => {
               // succ - boolean, tells if the call is successful
               console.log("Success: " + succ);
               console.log("Message: " + msg);
             })
-
+            */
             let objectWallet = new Object();
             
             if(totalBalance == awaitingConfirmation){
@@ -611,13 +652,13 @@ function checkWalletBalance() {
             objectWallet.awaitingConfirmation = awaitingConfirmation;
             objectWallet.lockedPreviousTransaction = lockedPreviousTransaction;
             objectWallet.currentlySpendable = currentlySpendable;
-
+            /*
             db.insertTableContent('walletInfo', objectWallet, (succ, msg) => {
               // succ - boolean, tells if the call is successful
               console.log("Success: " + succ);
               console.log("Message: " + msg);
             })
-
+            */
             document.getElementById("totalBalance").innerHTML = totalBalance;
             walletArray = [];
         }

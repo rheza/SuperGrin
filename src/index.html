@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Grin Wallet Electron</title>
+    <title>SuperGrin</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="tab.css" media="screen" />
   </head>
@@ -22,6 +22,7 @@
         <button id="createWalletBtn" type="button" class="btn btn-primary">Create Wallet</button>
         <p></p>
         <button id="deleteWalletBtn" type="button" class="btn btn-danger btn-sm">Delete Wallet</button>
+        <button id="checkInitialBtn" type="button" class="btn btn-warning btn-sm" style="display: none;">Check</button>
       </div>
 
       <div id="formPasswordDiv">
@@ -64,7 +65,7 @@
         <p></p>
 
         <div id="balanceBox">
-          <button type="button" class="btn btn-primary">
+          <button type="button" class="btn btn-primary" disabled>
             Balance <span class="badge badge-light" id="totalBalance">0.0000000</span>
           </button>
           <h6 id="balanceWarningBox" style="display: none;"><span class="badge badge-secondary">Waiting for Confirmation</span></h6>
@@ -142,12 +143,24 @@
       </div>
       <p></p>
     </div>
-
+  
     <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
+        // You can also require other files to run in this process
+        require('./renderer.js');
+    </script>
+    <script>
+      document.addEventListener('readystatechange', event => {
 
-      
+        if (event.target.readyState === "interactive") {      //same as:  document.addEventListener("DOMContentLoaded"...   // same as  jQuery.ready
+            //");
+        }
+
+        if (event.target.readyState === "complete") {
+          var checkButton = document.getElementById("checkInitialBtn");
+          checkButton.click();
+        }
+
+        });
     </script>
   </body>
 </html>

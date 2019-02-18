@@ -14,3 +14,5 @@ input[type="radio"]:checked {
 input[type="radio"] {
     display: none;
 }
+
+input[disabled] { cursor:not-allowed; } 
