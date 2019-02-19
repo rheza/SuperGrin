@@ -15,7 +15,9 @@ Every file that Finalize and Response will be generated to Your Desktop.
 Only file based transaction supported.
 
 For more, you should read how the file based transaction work on GRIN.
+
 https://github.com/mimblewimble/docs/wiki/How-to-use-the-Grin-wallet#sending-grins
+https://github.com/mimblewimble/docs/wiki/How-to-use-the-Grin-wallet#receiving-grins
 
 ### Contribution
 It's open sourced, Please take a look and send pull request if you want to improve the apps.
