@@ -9,7 +9,8 @@ const remote = require('electron').remote;
 const app = remote.app;
 var os = require("os");
 var osvar = os.platform();
-var chainType = " --floonet"; //remove this for mainnet
+var chainType = "mainnet"; //remove this for mainnet
+var nodeAddress = 'http://45.76.144.45:3413'; //floonet
 
 var grinBinaries = "grin-mac";
 
@@ -21,11 +22,10 @@ if (osvar == 'darwin') {
 
 if (chainType != " --floonet"){
     chainType = "";
+    nodeAddress = 'http://35.197.132.97:3413';
 }
 
 appRootDir = app.getPath('userData');
-
-
 
 var fs = require('fs');
 var process = '';
