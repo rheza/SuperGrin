@@ -7,6 +7,22 @@ const { exec } = require('child_process')
 const {ipcRenderer} = require('electron')
 const remote = require('electron').remote;
 const app = remote.app;
+var os = require("os");
+var osvar = os.platform();
+var chainType = " --floonet"; //remove this for mainnet
+
+var grinBinaries = "grin-mac";
+
+if (osvar == 'darwin') {
+  grinBinaries = "grin-mac";
+}else if(osvar == 'win32'){
+  grinBinaries = "grin-win";
+}
+
+if (chainType != " --floonet"){
+    chainType = "";
+}
+
 appRootDir = app.getPath('userData');
 
 
@@ -45,7 +61,7 @@ function createWallet(mode,text) {
     if(!mode){
 
     
-    process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' init')
+    process = exec(grinnode + grinBinaries + chainType + ' wallet -r '+ nodeAddress +' init')
   
     process.stdout.on('data', (data) => {
         var output = data.toString();
@@ -58,13 +74,14 @@ function createWallet(mode,text) {
                 walletExist();  
         }
         if(output.includes("Please back-up these words in a non-digital format.")){
-                var twelveWordSeed = data.toString();
+                var wordSeed = data.toString();
                 
-                twelveWordSeed = twelveWordSeed.replace("Your recovery phrase is:","");
-                twelveWordSeed = twelveWordSeed.replace("Please back-up these words in a non-digital format.","");
-                twelveWordSeed = twelveWordSeed.replace(/(\r\n|\n|\r)/gm, "");
-
-                backupWallet(twelveWordSeed)
+                wordSeed = wordSeed.replace("Your recovery phrase is:","");
+                wordSeed = wordSeed.replace("Please back-up these words in a non-digital format.","");
+                
+                wordSeed = wordSeed.replace(/(\r\n|\n|\r)/gm, "");
+                wordSeed = wordSeed.replace("wallet.seed","wallet.seed ========================   ");
+                backupWallet(wordSeed)
             }
         })
     
@@ -74,6 +91,8 @@ function createWallet(mode,text) {
     }  else if (mode == "password"){
         process.stdin.write(text + "\n");
         process.stdin.write(text + "\n");
+        hidePasswordForm();
+        walletExist();
     }    
     //process.stdin.write("test\n");
     
@@ -114,7 +133,9 @@ var createWalletBtn = document.getElementById('createWalletBtn');
   if(createWalletBtn){
     createWalletBtn.addEventListener('click', function() {
         ipcRenderer.send('createWallet', 'ping');
+        hideCreateDeleteBtn();
         createWallet();
+        showPasswordForm();
       });
       
 }
@@ -140,6 +161,8 @@ var checkBalanceBtn = document.getElementById('checkBalanceBtn');
   if(checkBalanceBtn){
     checkBalanceBtn.addEventListener('click', function() {
         checkWalletBalance();
+        walletExist();
+        hideWordSeed();
       });
       
 }
@@ -161,7 +184,7 @@ var checkInitialBtn = document.getElementById('checkInitialBtn');
       
 }
 
-
+/*
 var inputPassword = document.getElementById('inputPassword');
 var inputPasswordConfirm = document.getElementById('inputPasswordConfirm');
 if(inputPasswordConfirm){
@@ -189,6 +212,24 @@ if(inputPasswordConfirm){
       
 }
 
+*/
+var createWalletProcessBtn = document.getElementById('createWalletProcessBtn');
+if(createWalletProcessBtn){
+  createWalletProcessBtn.addEventListener('click', function() {
+    if (inputPassword.value == inputPasswordConfirm.value){
+      document.getElementById("warningPassword").innerHTML = "";   
+      console.log(inputPasswordConfirm.value);
+      console.log("test enter password");
+      alert("Please write down your word seed. Otherwise you will lose your coins.")
+      createWallet("password", inputPasswordConfirm.value);
+    }
+    else {
+      var passwordWarning = "<div id=\"warningText\" class=\"alert alert-secondary\" role=\"alert\"> Password Warning</div>";
+      document.getElementById("warningPassword").innerHTML = passwordWarning;  
+    }
+  });
+    
+}
 
 var wordSeedBtn = document.getElementById('buttonWordSeed');
 if(wordSeedBtn){
@@ -287,7 +328,7 @@ function cancelTransactionGrin(){
   
   transactionArray = [];
 
-  process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' txs');
+  process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' txs');
 
   enterPasswordToProcess();
 
@@ -329,7 +370,7 @@ function cancelGrinNew(x){
   function wait() {
     console.log('canceling transaction no: ' + i);
     resetAPISecret();
-    process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' cancel -i '+ i);
+    process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' cancel -i '+ i);
     enterPasswordToProcess();
 
     process.stdout.on('data', (data) => {
@@ -367,7 +408,7 @@ function cancelGrin(i){
   //for (x = 1; x < i; x++) { 
     console.log('canceling transaction no: ' + x);
     resetAPISecret();
-    process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' cancel -i '+ x);
+    process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' cancel -i '+ x);
     enterPasswordToProcess();
 
     process.stdout.on('data', (data) => {
@@ -412,7 +453,7 @@ function sendGrin() {
   console.log(fileLocation);
   
   
-  process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' send -m file -d '+ fileLocation +'mytransaction-'+ textRandom+'.tx '+ sendGrinAmount);
+  process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' send -m file -d '+ fileLocation +'mytransaction-'+ textRandom+'.tx '+ sendGrinAmount);
   
   process.stdout.on('data', (data) => {
     var output = data.toString();
@@ -447,7 +488,7 @@ function sendGrin() {
 
 function finalizeReceive(fileLocation) {
   resetAPISecret();
-  process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' receive -i ' + fileLocation)
+  process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' receive -i ' + fileLocation)
   enterPasswordToProcess();
   process.stdout.on('data', (data) => {
   var output = data.toString();
@@ -471,7 +512,7 @@ function finalizeReceive(fileLocation) {
 
 function finalizeResponse(fileLocation) {
   resetAPISecret();
-  process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' finalize -i ' + fileLocation)
+  process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' finalize -i ' + fileLocation)
   enterPasswordToProcess();
   process.stdout.on('data', (data) => {
   var output = data.toString();
@@ -498,19 +539,30 @@ function walletNotExist() {
   document.getElementById("SendAndReceiveBox").style = "display: none;";
   document.getElementById("createWalletBtn").style = "display: block;";
   document.getElementById("deleteWalletBtn").style = "display: block;";
+  document.getElementById("checkBtnDiv").style = "display: none;";
+  document.getElementById("balanceBox").style = "display: none;";
+  document.getElementById("wordSeedBox").style = "display: none;";
+  hidePasswordForm();
 }
 
 function walletExist() {
   document.getElementById("createWalletBtn").style = "display: none;";
   document.getElementById("deleteWalletBtn").style = "display: none;";
+  document.getElementById("checkBalanceBtn").style = "display: block;";
+  document.getElementById("SendAndReceiveBox").style = "display: block;";
+  document.getElementById("checkBtnDiv").style = "display: block;";
+  document.getElementById("balanceBox").style = "display: block;";
+  
   checkWalletBalance();
   startNode();
+  
 
 }
 
 function backupWallet(wordText) {
     console.log(wordText);
     console.log("Please Backup Wallet");
+    document.getElementById("wordSeedBox").style = "display: block;";
     document.getElementById("wordSeedBoxNew").innerHTML = wordText;
  
     document.getElementById("buttonWordSeed").style = "display: inline;";
@@ -518,9 +570,11 @@ function backupWallet(wordText) {
 }
 
 
+
 function hideWordSeed() {
     
     console.log("hide wallet");
+    document.getElementById("wordSeedBox").style = "display: none";
     document.getElementById("wordSeedBox").innerHTML = "";
     /*
     document.getElementById("createWalletBtn").style = "display: none;";
@@ -531,7 +585,7 @@ function hideWordSeed() {
 
     */
     document.getElementById("buttonWordSeed").style = "display: none;";
-    document.getElementById("startNodeBtn").style = "display: inline;";
+    
 
 }
 
@@ -559,7 +613,7 @@ function resetAPISecret(){
 }
 function startNode() {
     resetAPISecret();
-    process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' info')
+    process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' info')
   
     process.stdout.on('data', (data) => {
     var output = data.toString();
@@ -588,17 +642,23 @@ function enterPasswordToProcess(){
   process.stdin.write("test\n");
 }
 
+function hideCreateDeleteBtn(){
+  document.getElementById("createWalletBtn").style = "display: none;";
+  document.getElementById("deleteWalletBtn").style = "display: none;";
+}
+
 function hideAllWarning(){
   document.getElementById("formWalletInit").style = "display: none;";
   document.getElementById("sendGrinWarning").style = "display: none;";
 }
 function checkWalletBalance() {
+    
     hidePasswordForm();
     hideAllWarning();
     console.log("check balance");
     console.log(walletArray.length);
     resetAPISecret();
-    process = exec(grinnode +'grin-mac --floonet wallet -r '+ nodeAddress +' info');
+    process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' info');
     
 
     enterPasswordToProcess();

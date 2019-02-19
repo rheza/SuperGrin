@@ -16,3 +16,5 @@ input[type="radio"] {
 }
 
 input[disabled] { cursor:not-allowed; } 
+
+::-webkit-scrollbar { display: none; }
