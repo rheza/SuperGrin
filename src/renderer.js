@@ -30,7 +30,6 @@ appRootDir = app.getPath('userData');
 
 var fs = require('fs');
 var process = '';
-var nodeAddress = 'http://45.76.144.45:3413';
 
 var walletArray = [];
 var transactionArray = [];
