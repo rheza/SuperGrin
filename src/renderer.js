@@ -13,6 +13,7 @@ var chainType = "mainnet"; //remove this for mainnet
 var nodeAddress = 'http://45.76.144.45:3413'; //floonet
 
 var grinBinaries = "grin-mac";
+var pathToData  = "floo/";
 
 if (osvar == 'darwin') {
   grinBinaries = "grin-mac";
@@ -23,6 +24,7 @@ if (osvar == 'darwin') {
 if (chainType != " --floonet"){
     chainType = "";
     nodeAddress = 'http://35.197.132.97:3413';
+    pathToData = "main/"
 }
 
 appRootDir = app.getPath('userData');
@@ -43,7 +45,7 @@ function checkIfWalletAlreadyExists() {
   console.log(fileLocation);
 
 
-  fs.stat(fileLocation +'.grin/floo/wallet_data/wallet.seed', function(err, stat) {
+  fs.stat(fileLocation +'.grin/'+ pathToData +'wallet_data/wallet.seed', function(err, stat) {
     if(err == null) {
         console.log('File exists');
         walletExist();
@@ -111,7 +113,7 @@ function deleteWallet() {
     console.log(appRootDir);
     fileLocation = fileLocation.replace("Library/Application Support/SuperGrin",""); //replace this with wallet if installed
     console.log(fileLocation);
-    const process = exec('rm -rf '+ fileLocation +'.grin/floo/wallet_data/wallet.seed')
+    const process = exec('rm -rf '+ fileLocation +'.grin/'+ pathToData +'wallet_data/wallet.seed')
   
     process.stdout.on('data', (data) => {
     var output = data.toString();
@@ -597,12 +599,12 @@ function resetAPISecret(){
   console.log(fileLocation);
   
  
-  fs.unlink(fileLocation +'.grin/floo/.api_secret',function(err){
+  fs.unlink(fileLocation +'.grin/'+ pathToData +'.api_secret',function(err){
     if(err) return console.log(err);
     //console.log('file deleted successfully');
   }); 
   
-  fs.writeFile(fileLocation +'.grin/floo/.api_secret', 'UCSxkU9L4kYHuZKFVBYb', function (err) {
+  fs.writeFile(fileLocation +'.grin/'+ pathToData +'.api_secret', 'UCSxkU9L4kYHuZKFVBYb', function (err) {
     if (err) {
         return console.log(err);
     }
