@@ -87,8 +87,12 @@ function createWallet(mode,text) {
                 wordSeed = wordSeed.replace("Please back-up these words in a non-digital format.","");
                 
                 wordSeed = wordSeed.replace(/(\r\n|\n|\r)/gm, "");
-                wordSeed = wordSeed.replace("wallet.seed","wallet.seed ========================   ");
-                backupWallet(wordSeed)
+                wordSeed = wordSeed.replace("wallet.seed","wallet.seed ==   ");
+                var wordSeedWithLog = wordSeed;
+                var wordSeedWithoutLog = wordSeedWithLog.substring(wordSeedWithLog.indexOf("==")+1);
+                wordSeedWithoutLog = wordSeedWithoutLog.trim();
+                wordSeedWithoutLog = wordSeedWithoutLog.replace("= ","");
+                backupWallet(wordSeedWithoutLog);
             }
         })
     
