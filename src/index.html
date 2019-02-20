@@ -102,19 +102,27 @@
 
             <div class="tab">
                 <div id="sendGrinBox">
-                    <div class="input-group mb-3">
-                        <input id="sendGrinAmount" type="text" class="form-control" placeholder="0.00000" aria-label="0.00000" aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="basic-addon2">ツ</span>
+                    <div id="enterPasswordSend">
+                        <!--<img src="..." class="card-img-top" alt="...">-->
+                        <label id="inputPasswordText" for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="inputFileLocationSend" placeholder="" style="display: none;" >
+                          <input type="text" class="form-control" id="inputPasswordSend" placeholder="Password">
+                          <p></p>
+                          <button id="enterPasswordSendBtn" type="button" class="btn btn-danger btn-sm" >Send Grin</button>
                         </div>
-                      </div>
-                  <button id="sendGrinBtn" type="button" class="btn btn-danger btn-sm" >Send Grin</button>
-                  <button id="cancelGrinBtn" type="button" class="btn btn-danger btn-sm" >Cancel All Grin Txs</button>
+                        
+                    </div>
+                   <input id="sendGrinAmount" type="text" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon2"> 
+                   <p></p>
+                   <button id="sendGrinBtn" type="button" class="btn btn-danger btn-sm" >Send Grin</button>
+                   <p></p>
+                  <button id="cancelGrinBtn" type="button" class="btn btn-warning btn-sm" >Cancel All Grin Txs</button>
                 </div> 
         
                 <p></p>
         
-                <div class="card" style="width: 17rem;">
+                <div id="dragBoxSend" class="card" style="width: 17rem;">
                     <!--<img src="..." class="card-img-top" alt="...">-->
                     <div id="dragFileResponse" class="card-body">
                       <h5 class="card-title">Finalize file</h5>
@@ -124,13 +132,23 @@
                 </div>
             </div>
             <div class="tab">
-                <div class="card" style="width: 17rem;">
+                <div id="enterPasswordReceive">
+                    <!--<img src="..." class="card-img-top" alt="...">-->
+                    <label id="inputPasswordText" for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="inputFileLocationReceive" placeholder="" style="display: none;" >
+                      <input type="text" class="form-control" id="inputPasswordReceive" placeholder="Password">
+                      <p></p>
+                      <button id="enterPasswordReceiveBtn" type="button" class="btn btn-danger btn-sm" >Receive Grin</button>
+                    </div>
+                    
+                </div>
+                <div id="dragBoxReceive" class="card" style="width: 17rem;">
                     <!--<img src="..." class="card-img-top" alt="...">-->
                     <div id="dragFileReceive" class="card-body">
                       <h5 class="card-title">Receive file</h5>
                       <p class="card-text">Drop your receive file here</p>
-                      
-                    </div>
+                </div>
             </div>
             </div>
             

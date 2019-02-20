@@ -9,11 +9,15 @@ const remote = require('electron').remote;
 const app = remote.app;
 var os = require("os");
 var osvar = os.platform();
-var chainType = "mainnet"; //remove this for mainnet
+var chainType = " --floonet"; //remove this for mainnet if floo use " --floonet"
 var nodeAddress = 'http://45.76.144.45:3413'; //floonet
 
 var grinBinaries = "grin-mac";
 var pathToData  = "floo/";
+var apiSecretValue = "UCSxkU9L4kYHuZKFVBYb";
+
+const Store = require('electron-store');
+const store = new Store();
 
 if (osvar == 'darwin') {
   grinBinaries = "grin-mac";
@@ -24,7 +28,8 @@ if (osvar == 'darwin') {
 if (chainType != " --floonet"){
     chainType = "";
     nodeAddress = 'http://35.197.132.97:3413';
-    pathToData = "main/"
+    pathToData = "main/";
+    apiSecretValue = "DffhUVu4SBz5Yv2TFF8g";
 }
 
 appRootDir = app.getPath('userData');
@@ -91,6 +96,7 @@ function createWallet(mode,text) {
         console.log('stderr: ' + data.toString())
         })
     }  else if (mode == "password"){
+        store.set('password',text);
         process.stdin.write(text + "\n");
         process.stdin.write(text + "\n");
         hidePasswordForm();
@@ -130,6 +136,57 @@ function deleteWallet() {
     })
   
 };
+var inputPasswordReceive = document.getElementById('inputPasswordReceive');
+var enterPasswordReceiveBtn = document.getElementById('enterPasswordReceiveBtn');
+
+if (store.get('password') != ""){
+  inputPasswordReceive.value = store.get('password');
+}
+
+if(enterPasswordReceiveBtn){
+  enterPasswordReceiveBtn.addEventListener('click', function() {
+        if(inputPasswordReceive.value != ""){
+          if(inputFileLocationReceive.value != ""){
+            store.set('password',inputPasswordReceive.value );
+            finalizeReceive(inputFileLocationReceive.value,inputPasswordReceive.value);
+          }
+        }
+    });
+}
+
+var inputPasswordSend = document.getElementById('inputPasswordSend');
+var sendGrinBtn = document.getElementById('sendGrinBtn');
+var enterPasswordSendBtn = document.getElementById('enterPasswordSendBtn');
+var sendGrinAmount = document.getElementById('sendGrinAmount');
+
+
+if(sendGrinBtn){
+  sendGrinBtn.addEventListener('click', function() {
+    console.log(inputPasswordSend.value);
+    console.log(store.get('password'));
+        if(store.get('password') != ""){
+            store.set('password',inputPasswordSend.value );
+            sendGrin(sendGrinAmount.value,inputPasswordSend.value);
+            //finalizeSend(inputFileLocationReceive.value,inputPasswordReceive.value);
+        }else{
+           inputPasswordSend.value = "";
+           showPasswordSendForm();
+        }
+    });
+}
+
+if(enterPasswordSendBtn){
+  enterPasswordSendBtn.addEventListener('click', function() {
+    console.log(inputPasswordSend.value);
+    console.log(store.get('password'));
+    console.log(sendGrinAmount.value);
+    if(inputPasswordSend.value != ""){
+        store.set('password',inputPasswordSend.value );
+        sendGrin(sendGrinAmount.value,inputPasswordSend.value);
+        //finalizeSend(inputFileLocationReceive.value,inputPasswordReceive.value);
+    }
+  });
+}
 
 var createWalletBtn = document.getElementById('createWalletBtn');
   if(createWalletBtn){
@@ -151,13 +208,7 @@ var deleteWalletBtn = document.getElementById('deleteWalletBtn');
       
 }
 
-var startNodeBtn = document.getElementById('startNodeBtn');
-  if(startNodeBtn){
-    startNodeBtn.addEventListener('click', function() {
-        startNode();
-      });
-      
-}
+
 
 var checkBalanceBtn = document.getElementById('checkBalanceBtn');
   if(checkBalanceBtn){
@@ -165,17 +216,8 @@ var checkBalanceBtn = document.getElementById('checkBalanceBtn');
         checkWalletBalance();
         walletExist();
         hideWordSeed();
-      });
-      
-}
-
-var sendGrinBtn = document.getElementById('sendGrinBtn');
-  if(sendGrinBtn){
-    sendGrinBtn.addEventListener('click', function() {
-        
-        sendGrin();
-    });
-      
+        console.log(store.get('password'));
+  });    
 }
 
 var checkInitialBtn = document.getElementById('checkInitialBtn');
@@ -221,6 +263,7 @@ if(createWalletProcessBtn){
     if (inputPassword.value == inputPasswordConfirm.value){
       document.getElementById("warningPassword").innerHTML = "";   
       console.log(inputPasswordConfirm.value);
+      store.set('password',inputPasswordConfirm.value );
       console.log("test enter password");
       alert("Please write down your word seed. Otherwise you will lose your coins.")
       createWallet("password", inputPasswordConfirm.value);
@@ -242,8 +285,8 @@ if(wordSeedBtn){
       
 }
 
-var receiveFile = document.getElementById('dragFileReceive');
-
+var receiveFile = document.getElementById('dragBoxReceive');
+var inputFileLocationReceive = document.getElementById('inputFileLocationReceive');
 receiveFile.ondragover = () => {
   return false;
 };
@@ -261,15 +304,17 @@ receiveFile.ondrop = (e) => {
 
   for (let f of e.dataTransfer.files) {
     console.log('File(s) you dragged here: ', f.path)
-    finalizeReceive(f.path);
+    inputFileLocationReceive.value = f.path;
+    showPasswordReceiveForm();
+    
   }
             
   return false;
 };
 
 
-var finalizeFile = document.getElementById('dragFileResponse');
-
+var finalizeFile = document.getElementById('dragBoxSend');
+var inputFileLocationSend = document.getElementById('inputFileLocationSend');
 finalizeFile.ondragover = () => {
   return false;
 };
@@ -286,8 +331,17 @@ finalizeFile.ondrop = (e) => {
   e.preventDefault();
 
   for (let f of e.dataTransfer.files) {
-    console.log('File(s) you dragged here: ', f.path)
-    finalizeResponse(f.path);
+    
+  if (store.get('password') != ""){
+    inputFileLocationSend.value = f.path;
+    finalizeSend(f.path,store.get('password'));
+  }else{
+    console.log('File(s) you dragged here: ', f.path);
+    inputFileLocationSend.value = f.path;
+    showPasswordSendForm();
+  }
+    
+
     
   }
             
@@ -332,12 +386,12 @@ function cancelTransactionGrin(){
 
   process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' txs');
 
-  enterPasswordToProcess();
+  enterPasswordReceiveSend(store.get('password'));
 
   process.stdout.on('data', (data) => {
     str = data.toString();
 
-
+    console.log(str);
     var strArray = str.split("\n");
     transactionArray.push(strArray);
     console.log("transaction array " + transactionArray.length);
@@ -346,9 +400,9 @@ function cancelTransactionGrin(){
 
     var output = data.toString();
     console.log('stdout7: ' + data.toString())
+
     
-    
-    if (transactionArray.length == 5){
+    if (transactionArray.length == 4){
       console.log("Transaction 3 Array " + transactionArray[3].length);
       cancelGrinNew(transactionArray[3].length);
     }
@@ -373,7 +427,7 @@ function cancelGrinNew(x){
     console.log('canceling transaction no: ' + i);
     resetAPISecret();
     process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' cancel -i '+ i);
-    enterPasswordToProcess();
+    enterPasswordReceiveSend(store.get('password'));
 
     process.stdout.on('data', (data) => {
       var output = data.toString();
@@ -397,7 +451,7 @@ function cancelGrinNew(x){
     })
       i++;
       if( i < howManyTimes ){
-          setTimeout( wait, 1000 );
+          setTimeout( wait, 1500 );
       }
   }
   wait();
@@ -411,7 +465,7 @@ function cancelGrin(i){
     console.log('canceling transaction no: ' + x);
     resetAPISecret();
     process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' cancel -i '+ x);
-    enterPasswordToProcess();
+    enterPasswordReceiveSend(store.get('password'));
 
     process.stdout.on('data', (data) => {
       var output = data.toString();
@@ -441,9 +495,9 @@ function cancelGrin(i){
 }
 
 
-function sendGrin() {
+function sendGrin(amount, password) {
   resetAPISecret();
-  var sendGrinAmount = document.getElementById('sendGrinAmount').value;
+  var sendGrinAmount = amount;
   console.log(sendGrinAmount);
 
   
@@ -451,7 +505,7 @@ function sendGrin() {
   let textRandom = Math.random().toString(36).substring(7);
   var fileLocation = appRootDir;
   console.log(appRootDir);
-  fileLocation = fileLocation.replace("Library/Application Support/SuperGrin","Desktop"); //replace this with wallet if installed
+  fileLocation = fileLocation.replace("Library/Application Support/SuperGrin","Desktop/"); //replace this with wallet if installed
   console.log(fileLocation);
   
   
@@ -462,43 +516,65 @@ function sendGrin() {
       console.log('stdout5: ' + data.toString())
       if (output == "Password: "){
         console.log("ask password");
-        enterPasswordToProcess();
+        console.log(password);
+        if(password){
+          store.set('password',password);
+          enterPasswordReceiveSend(password);          
+        }else{
+          showPasswordSendForm();
+        }
+        
       }
       if (output.includes("Not enough funds")){
         document.getElementById("sendGrinWarning").style = "display: block;";
         document.getElementById("sendGrinWarning").innerHTML = output;
         console.log(output);
+        hidePasswordSendForm();
       }
       if (output.includes("Command \'send\' completed successfully")){
         document.getElementById("sendGrinWarning").style = "display: block;";
         document.getElementById("sendGrinWarning").innerHTML = output;
         console.log(output);
+        hidePasswordSendForm();
       }
   })
 
   
+
   process.stderr.on('data', (data) => {
       console.log('stderr: ' + data.toString())
   })
 
   process.on('exit', (code) => {
-      console.log('child process exited with code ' + code.toString())
+      console.log('child process exited with code ' + code.toString());
+      hidePasswordReceiveForm();
   })
   //grin wallet send -m file -d my_grin_transaction.tx 10.25
 }
 
 
-function finalizeReceive(fileLocation) {
+function finalizeReceive(fileLocation,password) {
   resetAPISecret();
-  process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' receive -i ' + fileLocation)
-  enterPasswordToProcess();
+  process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' receive -i ' + fileLocation);
+  console.log(fileLocation);
+  console.log(password);
+  enterPasswordReceiveSend(password);
   process.stdout.on('data', (data) => {
   var output = data.toString();
     console.log('stdout4: ' + data.toString())
     if (output.includes("Wallet command failed")){
       document.getElementById("sendGrinWarning").style = "display: block;";
       document.getElementById("sendGrinWarning").innerHTML = output;
+      hidePasswordReceiveForm();
       console.log(output);
+    }
+    if (output.includes("Invalid Arguments:")){
+      document.getElementById("sendGrinWarning").style = "display: block;";
+      document.getElementById("sendGrinWarning").innerHTML = output;
+      console.log(output);
+    }
+    if (output.includes("success")){
+      hidePasswordReceiveForm();
     }
   })
 
@@ -507,19 +583,35 @@ function finalizeReceive(fileLocation) {
   })
 
   process.on('exit', (code) => {
+    hidePasswordReceiveForm();
     console.log('child process exited with code ' + code.toString())
   })
 
 };
-
-function finalizeResponse(fileLocation) {
+function finalizeSend(fileLocation,password) {
   resetAPISecret();
   process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' finalize -i ' + fileLocation)
-  enterPasswordToProcess();
+  console.log(fileLocation);
+  console.log(password);
+  enterPasswordReceiveSend(password);
   process.stdout.on('data', (data) => {
   var output = data.toString();
     console.log('stdout3: ' + data.toString())
-    
+    if (output.includes("Wallet command failed")){
+      document.getElementById("sendGrinWarning").style = "display: block;";
+      document.getElementById("sendGrinWarning").innerHTML = output;
+      console.log(output);
+      console.log("Finalize");
+      hidePasswordSendForm();
+    }
+    if (output.includes("Invalid Arguments:")){
+      document.getElementById("sendGrinWarning").style = "display: block;";
+      document.getElementById("sendGrinWarning").innerHTML = output;
+      console.log(output);
+    }
+    if (output.includes("success")){
+      hidePasswordSendForm();
+    }
   })
 
   process.stderr.on('data', (data) => {
@@ -527,6 +619,8 @@ function finalizeResponse(fileLocation) {
   })
 
   process.on('exit', (code) => {
+    hidePasswordSendForm();
+    showSend();
     console.log('child process exited with code ' + code.toString())
   })
 
@@ -544,20 +638,21 @@ function walletNotExist() {
   document.getElementById("checkBtnDiv").style = "display: none;";
   document.getElementById("balanceBox").style = "display: none;";
   document.getElementById("wordSeedBox").style = "display: none;";
+  
   hidePasswordForm();
 }
 
 function walletExist() {
+  document.getElementById("wordSeedBox").style = "display: none;";
   document.getElementById("createWalletBtn").style = "display: none;";
   document.getElementById("deleteWalletBtn").style = "display: none;";
   document.getElementById("checkBalanceBtn").style = "display: block;";
   document.getElementById("SendAndReceiveBox").style = "display: block;";
   document.getElementById("checkBtnDiv").style = "display: block;";
   document.getElementById("balanceBox").style = "display: block;";
-  
+  document.getElementById("enterPasswordReceive").style = "display: none;";
+  document.getElementById("enterPasswordSend").style = "display: none;";
   checkWalletBalance();
-  startNode();
-  
 
 }
 
@@ -597,14 +692,14 @@ function resetAPISecret(){
   console.log(appRootDir);
   fileLocation = fileLocation.replace("Library/Application Support/SuperGrin",""); //replace this with wallet if installed
   console.log(fileLocation);
-  
- 
+  console.log(apiSecretValue);
+  console.log(fileLocation +'.grin/'+ pathToData +'.api_secret');
   fs.unlink(fileLocation +'.grin/'+ pathToData +'.api_secret',function(err){
     if(err) return console.log(err);
     //console.log('file deleted successfully');
   }); 
   
-  fs.writeFile(fileLocation +'.grin/'+ pathToData +'.api_secret', 'UCSxkU9L4kYHuZKFVBYb', function (err) {
+  fs.writeFile(fileLocation +'.grin/'+ pathToData +'.api_secret', apiSecretValue, function (err) {
     if (err) {
         return console.log(err);
     }
@@ -613,26 +708,33 @@ function resetAPISecret(){
   
 
 }
-function startNode() {
-    resetAPISecret();
-    process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' info')
   
-    process.stdout.on('data', (data) => {
-    var output = data.toString();
-      console.log('stdout2: ' + data.toString())
-      enterPasswordToProcess();
-    })
-  
-    process.stderr.on('data', (data) => {
-      console.log('stderr: ' + data.toString())
-    })
+function showPasswordSendForm(){
+  document.getElementById('sendGrinAmount').style.display = 'none';
+  document.getElementById('sendGrinBtn').style.display = 'none';
+  document.getElementById('cancelGrinBtn').style.display = 'none';
+  document.getElementById('enterPasswordSend').style.display = 'block';
+  document.getElementById('dragBoxSend').style.display = 'none';
+}
 
-    process.on('exit', (code) => {
-      console.log('child process exited with code ' + code.toString())
-    })
+function hidePasswordSendForm(){
+  document.getElementById('enterPasswordSend').style.display = 'none';
+  document.getElementById('dragBoxSend').style.display = 'block';
+  document.getElementById('sendGrinAmount').style.display = 'block';
+  document.getElementById('sendGrinBtn').style.display = 'block';
+  document.getElementById('cancelGrinBtn').style.display = 'block';
+}
   
-};
-  
+function showPasswordReceiveForm(){
+  document.getElementById('enterPasswordReceive').style.display = 'block';
+  document.getElementById('dragBoxReceive').style.display = 'none';
+}
+
+function hidePasswordReceiveForm(){
+  document.getElementById('enterPasswordReceive').style.display = 'none';
+  document.getElementById('dragBoxReceive').style.display = 'block';
+}
+
 function showPasswordForm(){
   document.getElementById('formPasswordDiv').style.display = 'block';
 }
@@ -642,6 +744,12 @@ function hidePasswordForm(){
 
 function enterPasswordToProcess(){
   process.stdin.write("test\n");
+}
+
+function enterPasswordReceiveSend(password){
+  var value = password+"\n";
+  console.log(value);
+  process.stdin.write(value);
 }
 
 function hideCreateDeleteBtn(){
@@ -662,8 +770,9 @@ function checkWalletBalance() {
     resetAPISecret();
     process = exec(grinnode + grinBinaries + chainType +' wallet -r '+ nodeAddress +' info');
     
+    console.log("Password from store = ",store.get('password'));
+    enterPasswordReceiveSend(store.get('password'));
 
-    enterPasswordToProcess();
    
    
     process.stdout.on('data', (data) => {
@@ -717,10 +826,14 @@ function checkWalletBalance() {
               }
             }
 
+            if(lockedPreviousTransaction != "0.000000000 "){
+               document.getElementById("balanceWarningBox").style = "display: block;";
+            } 
             objectWallet.totalBalance = totalBalance;
             objectWallet.awaitingConfirmation = awaitingConfirmation;
             objectWallet.lockedPreviousTransaction = lockedPreviousTransaction;
             objectWallet.currentlySpendable = currentlySpendable;
+
             /*
             db.insertTableContent('walletInfo', objectWallet, (succ, msg) => {
               // succ - boolean, tells if the call is successful
@@ -728,7 +841,12 @@ function checkWalletBalance() {
               console.log("Message: " + msg);
             })
             */
-            document.getElementById("totalBalance").innerHTML = totalBalance;
+            if(isNumeric(totalBalance)){
+              store.set('balance',totalBalance);
+            }
+            if(store.get('balance') != ""){
+              document.getElementById("totalBalance").innerHTML = store.get('balance');
+            }
             walletArray = [];
         }
 
@@ -748,3 +866,6 @@ function checkWalletBalance() {
 };
   
 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
