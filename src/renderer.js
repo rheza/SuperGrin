@@ -9,7 +9,7 @@ const remote = require('electron').remote;
 const app = remote.app;
 var os = require("os");
 var osvar = os.platform();
-var chainType = " --floonet"; //remove this for mainnet if floo use " --floonet"
+var chainType = "mainnet"; //remove this for mainnet if floo use " --floonet"
 var nodeAddress = 'http://45.76.144.45:3413'; //floonet
 
 var grinBinaries = "grin-mac";
