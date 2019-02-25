@@ -54,6 +54,8 @@ function checkIfWalletAlreadyExists() {
     if(err == null) {
         console.log('File exists');
         walletExist();
+        hidePasswordForm();
+        hideWordSeed();
     } else if(err.code === 'ENOENT') {
         // file does not exist
         walletNotExist();
@@ -93,6 +95,7 @@ function createWallet(mode,text) {
                 wordSeedWithoutLog = wordSeedWithoutLog.trim();
                 wordSeedWithoutLog = wordSeedWithoutLog.replace("= ","");
                 backupWallet(wordSeedWithoutLog);
+                console.log(wordSeedWithoutLog);
             }
         })
     
@@ -105,7 +108,35 @@ function createWallet(mode,text) {
         process.stdin.write(text + "\n");
         hidePasswordForm();
         walletExist();
-    }    
+    }  else if (mode == "createwalletwithpassword"){
+      process = exec(grinnode + grinBinaries + chainType + ' wallet -r '+ nodeAddress +' init')
+      store.set('password',text);
+      process.stdin.write(text + "\n");
+      process.stdin.write(text + "\n");
+      hidePasswordForm();
+      walletExist();
+
+      process.stdout.on('data', (data) => {
+        var output = data.toString();
+        console.log(output);
+        if(output.includes("Please back-up these words in a non-digital format.")){
+                var wordSeed = data.toString();
+                
+                wordSeed = wordSeed.replace("Your recovery phrase is:","");
+                wordSeed = wordSeed.replace("Please back-up these words in a non-digital format.","");
+                
+                wordSeed = wordSeed.replace(/(\r\n|\n|\r)/gm, "");
+                wordSeed = wordSeed.replace("wallet.seed","wallet.seed ==   ");
+                var wordSeedWithLog = wordSeed;
+                var wordSeedWithoutLog = wordSeedWithLog.substring(wordSeedWithLog.indexOf("==")+1);
+                wordSeedWithoutLog = wordSeedWithoutLog.trim();
+                wordSeedWithoutLog = wordSeedWithoutLog.replace("= ","");
+                backupWallet(wordSeedWithoutLog);
+                console.log(wordSeedWithoutLog);
+            }
+        })
+      
+  }  
     //process.stdin.write("test\n");
     
     //process.stdin.write("test\n");
@@ -197,7 +228,6 @@ var createWalletBtn = document.getElementById('createWalletBtn');
     createWalletBtn.addEventListener('click', function() {
         ipcRenderer.send('createWallet', 'ping');
         hideCreateDeleteBtn();
-        createWallet();
         showPasswordForm();
       });
       
@@ -269,8 +299,9 @@ if(createWalletProcessBtn){
       console.log(inputPasswordConfirm.value);
       store.set('password',inputPasswordConfirm.value );
       console.log("test enter password");
+      createWallet("createwalletwithpassword", inputPasswordConfirm.value);
       alert("Please write down your word seed. Otherwise you will lose your coins.")
-      createWallet("password", inputPasswordConfirm.value);
+      
     }
     else {
       var passwordWarning = "<div id=\"warningText\" class=\"alert alert-secondary\" role=\"alert\"> Password Warning</div>";
@@ -647,7 +678,7 @@ function walletNotExist() {
 }
 
 function walletExist() {
-  document.getElementById("wordSeedBox").style = "display: none;";
+  
   document.getElementById("createWalletBtn").style = "display: none;";
   document.getElementById("deleteWalletBtn").style = "display: none;";
   document.getElementById("checkBalanceBtn").style = "display: block;";
@@ -656,9 +687,10 @@ function walletExist() {
   document.getElementById("balanceBox").style = "display: block;";
   document.getElementById("enterPasswordReceive").style = "display: none;";
   document.getElementById("enterPasswordSend").style = "display: none;";
-  checkWalletBalance();
+  
 
 }
+
 
 function backupWallet(wordText) {
     console.log(wordText);
@@ -833,6 +865,11 @@ function checkWalletBalance() {
             if(lockedPreviousTransaction != "0.000000000 "){
                document.getElementById("balanceWarningBox").style = "display: block;";
             } 
+
+            if( totalBalance == currentlySpendable){
+              document.getElementById("balanceWarningBox").style = "display: none;";
+            }
+
             objectWallet.totalBalance = totalBalance;
             objectWallet.awaitingConfirmation = awaitingConfirmation;
             objectWallet.lockedPreviousTransaction = lockedPreviousTransaction;
