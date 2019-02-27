@@ -2,7 +2,7 @@
 
 Simple wallet for GRIN.
 
-![https://i.imgur.com/xM9hKDU.png](https://i.imgur.com/xM9hKDU.png)
+![https://i.imgur.com/OdBe4LV.png](https://i.imgur.com/OdBe4LV.png)
 
 ### How to install:
 
