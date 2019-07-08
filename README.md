@@ -1,5 +1,10 @@
 # SuperGrin
 
+### Please use other wallet
+[Development Ended]
+Please use other community wallet, 
+https://github.com/mimblewimble/docs/wiki/Community-projects#wallets
+###
 Simple wallet for GRIN.
 
 ![https://i.imgur.com/OdBe4LV.png](https://i.imgur.com/OdBe4LV.png)
